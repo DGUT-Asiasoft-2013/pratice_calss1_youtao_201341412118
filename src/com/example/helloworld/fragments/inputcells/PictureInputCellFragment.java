@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -18,9 +19,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class PictureInputCellFragment extends BaseInputCellFragment {
+
+	final int REQUESTCODE_CAMERA = 1;
+	final int REQUESTCODE_ALBUM = 2;
+
 	ImageView imageView;
 	TextView labelText;
 	TextView hintText;
+
+
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,25 +82,36 @@ public class PictureInputCellFragment extends BaseInputCellFragment {
 		.setNegativeButton("È¡Ïû", null)
 		.show();
 	}
-	
+
 	void takePhoto(){
 		Intent itnt = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-		startActivityForResult(itnt,1);
+		startActivityForResult(itnt,REQUESTCODE_CAMERA);
 	}
-	
+
 	void pickFromAlbum(){
-		
+		Intent itnt = new Intent(Intent.ACTION_GET_CONTENT);
+		itnt.setType("image/*");
+		startActivityForResult(itnt,REQUESTCODE_ALBUM);
+
 	}
-	
-	
+
+
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if(resultCode == Activity.RESULT_CANCELED) return;
-		if(resultCode == 1){
-			Log.d("camera capture", data.getExtras().keySet().toString());
-			Toast.makeText(getActivity(), data.getDataString(), Toast.LENGTH_LONG);
+		if(requestCode==REQUESTCODE_CAMERA){
+			Bitmap bmp = (Bitmap)data.getExtras().get("data");
+			imageView.setImageBitmap(bmp);
+		}else if(requestCode ==REQUESTCODE_ALBUM ){
+			try{
+				Bitmap bmp = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), data.getData());
+				imageView.setImageBitmap(bmp);
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+	
 		}
-		super.onActivityResult(requestCode, resultCode, data);
+
 	}
 
 	public void setHintText(String hintText){
