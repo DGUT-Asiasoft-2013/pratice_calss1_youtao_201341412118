@@ -26,11 +26,15 @@
             android:name=".LoginActivity"
             android:label="@string/app_name" >
         </activity>
-        
-        <activity 
+        <activity
             android:name=".RegisterActivity"
-            android:label="@string/app_name">
-            ></activity>
+            android:label="@string/app_name" >
+            >
+        </activity>
+        <activity android:name="com.example.helloworld.HelloworldActivity" >
+        </activity>
+        <activity android:name="com.example.helloworld.PasswordRecoverActivity" >
+        </activity>
     </application>
 
 </manifest>
