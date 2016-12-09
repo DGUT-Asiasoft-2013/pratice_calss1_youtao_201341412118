@@ -2,6 +2,7 @@ package com.example.helloworld;
 
 import java.io.IOException;
 
+import com.example.helloworld.fragments.inputcells.PictureInputCellFragment;
 import com.example.helloworld.fragments.inputcells.SimpleTextInputCellFragment;
 
 import android.app.Activity;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.view.View;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -24,8 +26,8 @@ public class RegisterActivity extends Activity {
 	SimpleTextInputCellFragment fragInputCellPasswordRepeat;
 	SimpleTextInputCellFragment fragInputEmailAddress;
 	SimpleTextInputCellFragment fragInputName;
-
-	@Override
+	PictureInputCellFragment fragInputAvatar;
+	@Override 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
@@ -36,10 +38,11 @@ public class RegisterActivity extends Activity {
 		fragInputCellPassword = (SimpleTextInputCellFragment) getFragmentManager().findFragmentById(R.id.input_password);
 		fragInputCellPasswordRepeat = (SimpleTextInputCellFragment) getFragmentManager().findFragmentById(R.id.input_password_repeat);
 		fragInputName = (SimpleTextInputCellFragment) getFragmentManager().findFragmentById(R.id.input_name);
+		fragInputAvatar = (PictureInputCellFragment) getFragmentManager().findFragmentById(R.id.input_picture);
 
-		
+
 		findViewById(R.id.btn_submit).setOnClickListener(new View.OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
@@ -47,8 +50,8 @@ public class RegisterActivity extends Activity {
 			}
 		});
 	}
-	
-	
+
+
 
 	void submit(){
 		String password = fragInputCellPassword.getText();
@@ -56,6 +59,7 @@ public class RegisterActivity extends Activity {
 		String account = fragInputCellAccount.getText();
 		String name = fragInputName.getText();
 		String email = fragInputEmailAddress.getText();
+		byte[] picture = fragInputAvatar.getPngData();
 
 		if(!password.equals(passwordRepeat)){
 			new AlertDialog.Builder(RegisterActivity.this)
@@ -66,6 +70,9 @@ public class RegisterActivity extends Activity {
 			return;
 		}
 
+
+		password = MD5.getMD5(password+"gkkkghkg");
+
 		OkHttpClient client = new OkHttpClient();
 		MultipartBody.Builder  requestBuilderBody = new MultipartBody.Builder()
 				.setType(MultipartBody.FORM)
@@ -73,6 +80,20 @@ public class RegisterActivity extends Activity {
 				.addFormDataPart("name", name)
 				.addFormDataPart("email", email)
 				.addFormDataPart("passwordHash", password);
+
+
+		if(fragInputAvatar.getPngData()!=null){
+			requestBuilderBody
+			.addFormDataPart(
+					"avatar",
+					"avatar",
+					RequestBody
+					.create(MediaType.parse("image/png"),
+							fragInputAvatar.getPngData()));
+
+
+		}
+
 
 
 		Request request = new Request.Builder()
@@ -91,11 +112,11 @@ public class RegisterActivity extends Activity {
 
 			@Override
 			public void onResponse(final Call arg0, final Response arg1) throws IOException {
-				
+
 				runOnUiThread(new Runnable() {
 					public void run() {
 						progressDialog.dismiss();
-						
+
 						try{
 							RegisterActivity.this.onResponse(arg0,arg1.body().string());
 						}catch(Exception e){
@@ -110,12 +131,12 @@ public class RegisterActivity extends Activity {
 			public void onFailure(final Call arg0, final IOException arg1) {
 				// TODO Auto-generated method stub
 				runOnUiThread(new Runnable() {
-					
+
 					@Override
 					public void run() {
 						// TODO Auto-generated method stub
 						progressDialog.dismiss();
-						
+
 						onFailure(arg0, arg1);
 					}
 				});
@@ -123,14 +144,14 @@ public class RegisterActivity extends Activity {
 			}
 		});
 	}
-	
-	
-	 void onResponse(Call arg0,String responseBody){
+
+
+	void onResponse(Call arg0,String responseBody){
 		new AlertDialog.Builder(this)
 		.setTitle("注册成功")
 		.setMessage(responseBody)
 		.setPositiveButton("好", new DialogInterface.OnClickListener() {
-			
+
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				// TODO Auto-generated method stub
@@ -139,8 +160,8 @@ public class RegisterActivity extends Activity {
 		})
 		.show();
 	}
-	
-	
+
+
 	void onFailure(Call arg0,Exception arg1){
 		new AlertDialog.Builder(this)
 		.setTitle("请求失败")
@@ -148,7 +169,7 @@ public class RegisterActivity extends Activity {
 		.setNegativeButton("好", null)
 		.show();
 	}
-	
+
 
 	@Override
 	protected void onResume() {
