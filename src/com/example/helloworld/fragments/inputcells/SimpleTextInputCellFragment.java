@@ -42,4 +42,10 @@ public class SimpleTextInputCellFragment extends Fragment {
 		}
 	}
 
+	public String getText() {
+		// TODO Auto-generated method stub
+		return edit.getText().toString();
+
+	}
+
 }

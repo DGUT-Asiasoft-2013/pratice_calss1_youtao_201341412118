@@ -37,6 +37,14 @@ public class MainTabbarFragment extends Fragment {
 			});
 		}
 
+		btnNew.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				onNewClicked();
+			}
+		});
+
 		return view;
 	}
 
@@ -65,6 +73,7 @@ public class MainTabbarFragment extends Fragment {
 
 			if(othertab == tab){
 				othertab.setSelected(true);
+				selectedIndex = i;
 			}
 			else{
 				othertab.setSelected(false);
@@ -73,5 +82,20 @@ public class MainTabbarFragment extends Fragment {
 		if(onTabSelectedListener != null && selectedIndex>=0){
 			onTabSelectedListener.onTabSelected(selectedIndex);
 		}
+	}
+
+	public static interface OnNewClickedListener{
+		void onNewClicked();
+	}
+
+	OnNewClickedListener onNewClickedListener;
+
+	public void setOnNewClickedListener(OnNewClickedListener listener){
+		this.onNewClickedListener = listener;
+	}
+
+	void onNewClicked(){
+		if(onNewClickedListener!=null)
+			onNewClickedListener.onNewClicked();
 	}
 }
