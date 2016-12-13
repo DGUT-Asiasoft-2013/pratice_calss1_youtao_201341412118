@@ -14,6 +14,7 @@ import okhttp3.Request;
 public class Server {
 
 	static OkHttpClient client;
+	public static String serverAddress="http://172.27.0.44:8080/membercenter/";
 	static{
 		// TODO Auto-generated method stub
 		CookieManager cookieManager = new CookieManager();
@@ -28,8 +29,16 @@ public class Server {
 		return client;
 	}
 	
+	public static String getServerAddress() {
+		return serverAddress;
+	}
+
+	public static void setServerAddress(String serverAddress) {
+		Server.serverAddress = serverAddress;
+	}
+
 	public static Request.Builder requestBuilderWithApi(String api){
 		return new Request.Builder()
-		.url("http://172.27.0.44:8080/membercenter/api/"+api);
+		.url(serverAddress+"api/"+api);
 	}
 }

@@ -1,9 +1,11 @@
 package com.example.helloworld.fragment.pages;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.example.helloworld.R;
 import com.example.helloworld.api.Server;
+import com.example.helloworld.entity.Article;
 import com.example.helloworld.entity.User;
 import com.example.helloworld.fragment.AvatarView;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,8 +31,8 @@ public class MyProfileFragment extends Fragment {
 	View view;
 	TextView textView;
 	ProgressBar progress;
-	AvatarView avtar;
-	
+	AvatarView avatar;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		if(view == null){
@@ -38,7 +40,9 @@ public class MyProfileFragment extends Fragment {
 			view=inflater.inflate(R.layout.fragment_page_my_profile, null);
 			textView=(TextView)view.findViewById(R.id.text);
 			progress=(ProgressBar)view.findViewById(R.id.prograss);
+			avatar = (AvatarView) view.findViewById(R.id.avatar);
 		}
+		
 		return view;
 	}
 
@@ -99,7 +103,7 @@ public class MyProfileFragment extends Fragment {
 	
 	void onResponse(Call arg0,User user){
 		progress.setVisibility(View.GONE);
-//		avtar.load(user);
+		avatar.load(user);
 		textView.setVisibility(View.VISIBLE);
 		textView.setVisibility(Color.BLACK);
 		textView.setText("Hello,"+user.getName());

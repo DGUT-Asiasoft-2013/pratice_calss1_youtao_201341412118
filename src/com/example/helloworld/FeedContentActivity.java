@@ -19,5 +19,5 @@ public class FeedContentActivity extends Activity {
 		
 		TextView textView = (TextView) findViewById(R.id.text);
 		textView.setText(text);
-	}
+	}	                              
 }
