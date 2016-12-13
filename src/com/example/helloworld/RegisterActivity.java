@@ -71,7 +71,7 @@ public class RegisterActivity extends Activity {
 		}
 
 
-		password = MD5.getMD5(password+"gkkkghkg");
+		password = MD5.getMD5(password);
 
 		OkHttpClient client = new OkHttpClient();
 		MultipartBody.Builder  requestBuilderBody = new MultipartBody.Builder()
@@ -97,7 +97,7 @@ public class RegisterActivity extends Activity {
 
 
 		Request request = new Request.Builder()
-				.url("http://172.27.0.19:8080/membercenter/api/register")
+				.url("http://172.27.0.44:8080/membercenter/api/register")
 				.method("post", null)
 				.post(requestBuilderBody.build())
 				.build();
@@ -196,7 +196,6 @@ public class RegisterActivity extends Activity {
 		fragInputName.setLabelText("–’√˚");{
 			fragInputName.setHintText("«Î ‰»Î–’√˚");
 		}
-
 
 	}
 

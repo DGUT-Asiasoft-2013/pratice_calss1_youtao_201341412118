@@ -15,18 +15,22 @@ public class PasswordRecoverStep1Fragments extends Fragment {
 	View view;
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		 view = inflater.inflate(R.layout.fragment_password_recover_step1,null);
 
-		fragEmail = (SimpleTextInputCellFragment) getFragmentManager().findFragmentById(R.id.input_email);
+		if(view==null){
+			view = inflater.inflate(R.layout.fragment_password_recover_step1,null);
 
-		view.findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {
+			fragEmail = (SimpleTextInputCellFragment) getFragmentManager().findFragmentById(R.id.input_email);
 
-			@Override
-			public void onClick(View v) {
-				goNext();
+			view.findViewById(R.id.btn_next).setOnClickListener(new View.OnClickListener() {
 
-			}
-		});
+				@Override
+				public void onClick(View v) {
+					goNext();
+
+				}
+			});			
+		}
+
 		return view;
 	}
 
@@ -49,9 +53,17 @@ public class PasswordRecoverStep1Fragments extends Fragment {
 		this.onGoNextListener = onGoNextListener;
 	}
 
+
 	void goNext(){
 		if(onGoNextListener!=null){
 			onGoNextListener.onGoNext();
 		}
 	}
+
+	public String getText() {
+		// TODO Auto-generated method stub
+		return fragEmail.getText().toString();
+	}
+
+
 }

@@ -31,7 +31,7 @@ public class FeedLisFragment extends Fragment {
 			listView.setAdapter(lisAdapter);
 
 			Random rand = new Random();
-			data = new String[10+rand.nextInt()%20];
+			data = new String[10+Math.abs(rand.nextInt()%20)];
 
 			for(int i=0; i<data.length;i++){
 				data[i] = "THIS POW IS"+rand.nextInt();

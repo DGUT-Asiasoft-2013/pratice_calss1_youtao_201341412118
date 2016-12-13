@@ -21,7 +21,7 @@ public class BootActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_boot);
+		setContentView(R.layout.activity_boot);        
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public class BootActivity extends Activity {
 
 		OkHttpClient client = new OkHttpClient();
 		Request request = new Request.Builder()
-				.url("http://172.27.0.19:8080/membercenter/api/hello")
+				.url("http://172.27.0.44:8080/membercenter/api/hello")
 				.method("Get", null)
 				.build();
 		
