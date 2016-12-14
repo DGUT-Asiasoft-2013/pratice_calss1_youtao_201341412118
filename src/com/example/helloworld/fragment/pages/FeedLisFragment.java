@@ -41,7 +41,6 @@ public class FeedLisFragment extends Fragment {
 	ListView listView;
 	View btnLoadMore;
 	TextView textLoadMore;
-	//	String[] data;
 
 	List<Article> data;
 	int page = 0;
@@ -157,17 +156,17 @@ public class FeedLisFragment extends Fragment {
 			@Override
 			public void onResponse(Call arg0, Response arg1) throws IOException {
 				try{
-					Page<Article> data = new ObjectMapper()
+					final Page<Article> data = new ObjectMapper()
 							.readValue(arg1.body().string(),
 									new TypeReference<Page<Article>>(){});
-					FeedLisFragment.this.page = data.getNumber();
-					FeedLisFragment.this.data = data.getContent();
+
 
 					getActivity().runOnUiThread(new Runnable() {
 
 						@Override
 						public void run() {
-
+							FeedLisFragment.this.page = data.getNumber();
+							FeedLisFragment.this.data = data.getContent();
 							lisAdapter.notifyDataSetInvalidated();
 
 						}
@@ -228,17 +227,17 @@ public class FeedLisFragment extends Fragment {
 				});
 
 				try{
-					Page<Article> feeds = new ObjectMapper().readValue(arg1.body().string(), new TypeReference<Page<Article>>() {});
+					final Page<Article> feeds = new ObjectMapper().readValue(arg1.body().string(), new TypeReference<Page<Article>>() {});
 					if(feeds.getNumber()>page){
-						if(data==null){
-							data = feeds.getContent();
-						}else{
-							data.addAll(feeds.getContent());
-						}
-						page = feeds.getNumber();
-
+						
 						getActivity().runOnUiThread(new Runnable() {
 							public void run() {
+								if(data==null){
+									data = feeds.getContent();
+								}else{
+									data.addAll(feeds.getContent());
+								}
+								page = feeds.getNumber();
 								lisAdapter.notifyDataSetChanged();
 							}
 						});
