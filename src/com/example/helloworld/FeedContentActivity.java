@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -25,10 +26,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.MultipartBody;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -36,6 +39,7 @@ public class FeedContentActivity extends Activity {
 
 	private Article article;
 	private View loadMoreView;
+	private Button btnLikes;
 
 	List<Comment> comments;
 	int page = 0;
@@ -74,25 +78,35 @@ public class FeedContentActivity extends Activity {
 					makeComment();
 				}
 			});
-		//	LayoutInflater().from(this).inflate(R.layout.widget_load_more_button,null)
+
+			btnLikes=(Button)headerView.findViewById(R.id.like);
+			headerView.findViewById(R.id.like).setOnClickListener(new View.OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					toggleLikes();
+
+				}
+			});
+			//	LayoutInflater().from(this).inflate(R.layout.widget_load_more_button,null)
 			loadMoreView = LayoutInflater.from(this).inflate(R.layout.widget_load_more_button,null);{
 				list.addFooterView(loadMoreView);
 			}
 		}
 		list.setAdapter(adapter);
 	}
-	
+
 	BaseAdapter adapter =new BaseAdapter() {
 
 		@Override
 		public View getView(int position, View view, ViewGroup parent) {
-			
-			
+
+
 			if(view == null){
 				view = LayoutInflater.from(parent.getContext()).inflate(R.layout.widget_feed_item,null);
-				
+
 			}
-			
+
 			Comment comment = comments.get(position);
 
 			TextView textContent = (TextView) view.findViewById(R.id.text);
@@ -129,14 +143,161 @@ public class FeedContentActivity extends Activity {
 			return comments == null ? 0: comments.size();
 		}
 	};
-	
+
+	private boolean isLiked;
+
 	void makeComment(){
 		Intent itnt = new Intent(this,NewCommentActivity.class);
 		itnt.putExtra("data", article);
 		startActivity(itnt);
 		overridePendingTransition(R.anim.slide_in_bottom, R.anim.none);
 	}
+
+	void checkLiked(){
+		Request request = Server.requestBuilderWithApi("/article/"+article.getId()+"/isliked").get().build();
+		Server.getSharedClient().newCall(request).enqueue(new Callback() {
+
+			@Override
+			public void onResponse(Call arg0, Response arg1) throws IOException {
+				try{
+					final String responseString = arg1.body().string();
+					final Boolean result = new ObjectMapper().readValue(responseString, Boolean.class);
+					runOnUiThread(new Runnable() {
+
+						@Override
+						public void run() {
+							onCheckLikedResult(result);
+
+						}
+					});
+				}catch(final Exception e){
+					e.printStackTrace();
+					runOnUiThread(new Runnable() {
+
+						@Override
+						public void run() {
+							onCheckLikedResult(false);
+
+						}
+					});
+				}
+
+			}
+
+			@Override
+			public void onFailure(Call arg0, IOException e) {
+				e.printStackTrace();
+				runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						onCheckLikedResult(false);
+
+					}
+				});
+
+			}
+		});
+	}
+
+	void onCheckLikedResult(boolean result){
+		isLiked = result;
+		btnLikes.setTextColor(result ? Color.BLUE : Color.BLACK);
+	}
+
+	void reloadLikes(){
+		Request request = Server.requestBuilderWithApi("/article/"+article.getId()+"/likes")
+				.get().build();
+		Server.getSharedClient().newCall(request).enqueue(new Callback() {
+			
+			@Override
+			public void onResponse(Call arg0, Response arg1) throws IOException {
+				try{
+					
+					String responseString = arg1.body().string();
+					final Integer count = new ObjectMapper().readValue(responseString, Integer.class);
+					
+					runOnUiThread(new Runnable() {
+						
+						@Override
+						public void run() {
+							onReloadLikesResult(count);
+							
+						}
+					});
+					
+				}catch(Exception e){
+					e.printStackTrace();
+					runOnUiThread(new Runnable() {
+						
+						@Override
+						public void run() {
+							onReloadLikesResult(0);
+							
+						}
+					});
+					
+				}
+				
+			}
+			
+			@Override
+			public void onFailure(Call arg0, IOException arg1) {
+				onReloadLikesResult(0);
+				
+			}
+		});
+	}
 	
+	void onReloadLikesResult(int count){
+		if(count>0){
+			btnLikes.setText("до("+count+")");
+		}else{
+			btnLikes.setText("до");
+		}
+	}
+	
+	void toggleLikes(){
+		MultipartBody body = new MultipartBody.Builder()
+				.addFormDataPart("likes", String.valueOf(!isLiked))
+				.build();
+		
+		Request request = Server.requestBuilderWithApi("/article/"+article.getId()+"/likes")
+				.post(body).build();
+		Server.getSharedClient().newCall(request).enqueue(new Callback() {
+			
+			@Override
+			public void onResponse(Call arg0, Response arg1) throws IOException {
+				runOnUiThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						reload();
+						
+					}
+				});
+				
+			}
+			
+			@Override
+			public void onFailure(Call arg0, IOException arg1) {
+				runOnUiThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						reload();
+						
+					}
+				});
+				
+			}
+		});
+	}
+
+
+
+
+
 	@Override
 	protected void onResume() {
 		// TODO Auto-generated method stub
@@ -145,26 +306,78 @@ public class FeedContentActivity extends Activity {
 	}
 
 	void reload() {
+		reloadLikes();
+		checkLiked();
+		
 		Request request = Server.requestBuilderWithApi("/article/"+article.getId()+"/comments")
 				.get().build();
 		Server.getSharedClient().newCall(request).enqueue(new Callback() {
-			
+
 			@Override
 			public void onResponse(Call arg0, Response arg1) throws IOException {
 				try{
 					String responseBody = arg1.body().string();
 					Log.d("responseBody", responseBody);
-					
+
 					final Page<Comment> data = new ObjectMapper().readValue(responseBody, 
 							new TypeReference<Page<Comment>>() {
-						
+
 					});
-					
+
+					runOnUiThread(new Runnable() {
+
+						@Override
+						public void run() {
+							FeedContentActivity.this.reloadDate(data);
+
+						}
+					});
+				}catch(final Exception e){
+					runOnUiThread(new Runnable() {
+
+						@Override
+						public void run() {
+							FeedContentActivity.this.onFailure(e);
+
+						}
+					});
+				}
+
+			}
+
+			@Override
+			public void onFailure(Call arg0, final IOException e) {
+				runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						FeedContentActivity.this.onFailure(e);
+
+					}
+				});
+
+			}
+		});
+	}
+	
+	void loadmore(){
+		page++;
+		
+		Request request = Server.requestBuilderWithApi("/article"+article.getId()+"/comments"+page)
+				.get().build();
+		
+		Server.getSharedClient().newCall(request).enqueue(new Callback() {
+			
+			@Override
+			public void onResponse(Call arg0, Response arg1) throws IOException {
+				try{
+					final Page<Comment> data = new ObjectMapper().readValue(arg1.body().string(),new TypeReference<Page<Comment>>(){
+						});
 					runOnUiThread(new Runnable() {
 						
 						@Override
 						public void run() {
-							FeedContentActivity.this.reloadDate(data);
+							FeedContentActivity.this.appendData(data);
 							
 						}
 					});
@@ -196,29 +409,29 @@ public class FeedContentActivity extends Activity {
 		});
 	}
 
-	 protected void appendData(Page<Comment> data) {
+	protected void appendData(Page<Comment> data) {
 		if(data.getNumber()>page){
 			page =data.getNumber();
 			if(comments == null){
 				comments = data.getContent();
-				
+
 			}else {
 				comments.addAll(data.getContent());
 			}
 		}
 		adapter.notifyDataSetChanged();
-		
+
 	}
 
 	protected void reloadDate(Page<Comment> data) {
 		page = data.getNumber();
 		comments = data.getContent();
 		adapter.notifyDataSetInvalidated();
-		
+
 	}
 
 	void onFailure(Exception e) {
 		new AlertDialog.Builder(this).setMessage(e.getMessage()).show();
-		
+
 	}
 }
