@@ -6,28 +6,35 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="50dp"
         android:layout_weight="1" >
 
         <EditText
+            android:id="@+id/search_keyword"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="8" >
+            android:layout_height="wrap_content"
+            android:layout_weight="4"
+            
+            android:hint="请输入搜索关键字" >
+            
 
             <requestFocus />
         </EditText>
 
         <Button
+            android:id="@+id/btn_search"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="2"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingBottom="5dp"
             android:text="搜索" />
     </LinearLayout>
 
     <ListView
+        android:id="@+id/list_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="15" >
+        android:layout_weight="10" >
     </ListView>
 
 </LinearLayout>
